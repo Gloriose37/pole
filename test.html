@@ -1,1 +1,325 @@
-# jianghuaiyan
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>The Silent Abyss · 无声沉沦</title>
+<style>
+:root {
+  --bg: #08080a;
+  --gold: #c5a059;
+  --dim: rgba(197,160,89,0.3);
+  --text: #dcd5c6;
+  --sub: #a0a5b5;
+  --font-en: Georgia, "Times New Roman", serif;
+  --font-cn: "Songti SC", "SimSun", "STSong", serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--bg);
+  color: var(--text); font-family: var(--font-cn); line-height: 1.8;
+  overflow-x: hidden;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  -webkit-tap-highlight-color: transparent;
+}
+
+body::after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 99;
+  background: radial-gradient(circle at 50% 40%, transparent 20%, rgba(0,0,0,0.85) 100%);
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--dim); }
+
+/* 滑动章节基础 */
+.section {
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  padding: 60px 20px;
+  opacity: 0; transform: translateY(40px);
+  transition: opacity 1s cubic-bezier(0.22, 1, 0.36, 1), transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.section.visible { opacity: 1; transform: translateY(0); }
+.inner { max-width: 680px; width: 100%; position: relative; z-index: 2; }
+
+.en { font-family: var(--font-en); font-size: 12px; letter-spacing: 0.4em; color: var(--gold); text-align: center; margin-bottom: 12px; }
+.cn-title { font-size: 24px; letter-spacing: 0.15em; text-align: center; margin-bottom: 30px; text-shadow: 0 0 15px rgba(197,160,89,0.3); }
+
+.divider {
+  width: 100%; height: 30px; background: url('line.png') center/contain no-repeat;
+  border-top: 1px solid var(--dim); border-bottom: 1px solid var(--dim);
+  margin: 30px 0; opacity: 0.6; filter: invert(80%) sepia(30%) saturate(500%);
+}
+
+.card {
+  background: rgba(255,255,255,0.015); border: 1px solid var(--dim);
+  padding: 30px; position: relative; box-shadow: inset 0 0 30px rgba(0,0,0,0.6);
+}
+.card::before, .card::after {
+  content: ""; position: absolute; width: 10px; height: 10px; border: 1px solid var(--gold);
+}
+.card::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+.card::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+
+/* 封面 */
+#page0 { padding: 0; align-items: center; text-align: center; position: relative; opacity: 1; transform: none; }
+.bg-img {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(10,10,15,0.3), rgba(5,5,8,1)), url('cover.jpg') center/cover no-repeat;
+  filter: grayscale(1) contrast(1.2); z-index: 0;
+}
+#page0 h1 { font-family: var(--font-en); font-size: clamp(2rem, 8vw, 3.5rem); letter-spacing: 0.2em; color: #fff; z-index: 2; }
+#page0 p { font-size: 1.1rem; letter-spacing: 0.6em; color: var(--gold); margin-top: 15px; margin-left: 0.6em; z-index: 2; }
+.tap-hint { margin-top: 80px; font-size: 12px; letter-spacing: 0.3em; color: var(--sub); animation: pulse 2.5s infinite; z-index: 2; }
+@keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+/* 档案 */
+.row { display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255,255,255,0.08); padding: 14px 0; }
+.row:last-child { border-bottom: 0; }
+.k { color: var(--gold); font-size: 0.9rem; font-family: var(--font-en); }
+.v { text-align: right; font-size: 0.95rem; }
+
+/* 术式 */
+.style-main-row { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; background: rgba(197,160,89,0.05); border: 1px solid var(--dim); margin-bottom: 10px; }
+.style-label { font-family: var(--font-en); font-size: 0.85rem; color: var(--gold); letter-spacing: 0.1em; }
+.style-val { font-size: 1.05rem; color: var(--text); text-align: right; letter-spacing: 0.05em; }
+
+.sub-head { font-family: var(--font-en); font-size: 0.85rem; color: var(--sub); letter-spacing: 0.15em; margin-bottom: 12px; margin-top: 25px; text-align: left; }
+.sub-tags { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.sub-tag {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.01);
+  padding: 10px 5px; border-radius: 2px; transition: 0.3s; text-align: center;
+}
+.sub-tag:hover { border-color: var(--dim); background: rgba(197,160,89,0.05); }
+.tag-en { font-family: var(--font-sans); font-size: 0.55rem; color: var(--sub); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+.tag-cn { font-size: 0.9rem; color: var(--text); }
+
+/* 结契 */
+.price-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(0,0,0,0.4); border-left: 2px solid var(--gold); margin-bottom: 15px; }
+.price-num { color: var(--gold); font-family: var(--font-en); font-size: 1.2rem; }
+.extra { margin-top: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: center; font-size: 0.9rem; color: var(--sub); }
+.extra span { color: var(--gold); font-family: var(--font-en); }
+
+/* 密约 */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.box { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 120px; text-decoration: none; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01); transition: 0.4s; }
+.box:hover, .box:active { border-color: var(--gold); background: rgba(197,160,89,0.05); }
+.box i { font-size: 1.5rem; font-style: normal; margin-bottom: 10px; color: var(--gold); }
+.box span { font-size: 0.9rem; color: var(--sub); letter-spacing: 0.2em; }
+
+/* 音效开关 */
+#btn { position: fixed; top: 20px; right: 20px; z-index: 9999; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--dim); background: rgba(0,0,0,0.6); color: var(--sub); font-size: 18px; cursor: pointer; transition: 0.3s; backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; }
+#btn.on { color: var(--gold); border-color: var(--gold); box-shadow: 0 0 15px rgba(197,160,89,0.4); background: rgba(197,160,89,0.1); }
+
+@media (max-width: 500px) {
+  .grid { grid-template-columns: 1fr; }
+  .extra { grid-template-columns: 1fr; }
+  .cn-title { font-size: 22px; }
+  .sub-tags { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<button id="btn" title="点击开启音效">♪</button>
+
+<!-- 1. 封面 -->
+<div class="section" id="page0">
+  <div class="bg-img"></div>
+  <h1>The Silent Abyss</h1>
+  <p>无声沉沦</p>
+  <div class="tap-hint">向下滚动 · 步入古堡</div>
+</div>
+
+<!-- 2. 档案 -->
+<div class="section">
+  <div class="inner">
+    <div class="en">Chapter I</div>
+    <div class="cn-title">旅者档案</div>
+    <div class="card">
+      <div class="row"><span class="k">代号 / Code</span><span class="v">江淮彦</span></div>
+      <div class="row"><span class="k">年龄 / Age</span><span class="v">21 · T</span></div>
+      <div class="row"><span class="k">星象 / Stars</span><span class="v">白羊 / ENTP</span></div>
+      <div class="row"><span class="k">常驻 / Forms</span><span class="v">正太 / 初始·疯帽</span></div>
+    </div>
+    <div class="divider"></div>
+  </div>
+</div>
+
+<!-- 3. 术式 -->
+<div class="section">
+  <div class="inner">
+    <div class="en">Chapter II</div>
+    <div class="cn-title">暗夜术式</div>
+    <div class="card">
+      <div class="style-main-row">
+        <span class="style-label">Main Style</span>
+        <span class="style-val">日常恶俗微擦狗1</span>
+      </div>
+      
+      <div class="sub-head">Sub-Style / 副风格</div>
+      <div class="sub-tags">
+        <div class="sub-tag"><span class="tag-en">Domme</span><span class="tag-cn">姐1</span></div>
+        <div class="sub-tag"><span class="tag-en">Motion</span><span class="tag-cn">动描</span></div>
+        <div class="sub-tag"><span class="tag-en">Fake Sub</span><span class="tag-cn">伪下位</span></div>
+        <div class="sub-tag"><span class="tag-en">Allure</span><span class="tag-cn">钓系</span></div>
+        <div class="sub-tag"><span class="tag-en">Daily</span><span class="tag-cn">日常</span></div>
+        <div class="sub-tag"><span class="tag-en">Direct</span><span class="tag-cn">直球</span></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+  </div>
+</div>
+
+<!-- 4. 结契 -->
+<div class="section">
+  <div class="inner">
+    <div class="en">Chapter III</div>
+    <div class="cn-title">结契</div>
+    <div class="card">
+      <div class="price-item">
+        <span>残月之夜 · 0.5 小时</span><span class="price-num">25</span>
+      </div>
+      <div class="price-item">
+        <span>圆月之夜 · 1 小时</span><span class="price-num">42</span>
+      </div>
+      <div class="extra">
+        <p>指定特性 · <span>+3</span></p>
+        <p>指定建模 · <span>+5</span></p>
+        <p>高阶擦拭 · <span>+10</span></p>
+        <p>修罗场域 · <span>+10</span></p>
+      </div>
+    </div>
+    <div class="divider"></div>
+  </div>
+</div>
+
+<!-- 5. 密约 -->
+<div class="section">
+  <div class="inner">
+    <div class="en">Chapter IV</div>
+    <div class="cn-title">隐秘契约</div>
+    <div class="card">
+      <div class="grid">
+        <a href="https://www.kdocs.cn/l/ceZHAUC8CPPd" target="_blank" class="box"><i>✝</i><span>法典 / 须知</span></a>
+        <a href="https://www.kdocs.cn/l/ceZHAUC8CPPd" target="_blank" class="box"><i>🪞</i><span>遗物 / 冠卡</span></a>
+        <a href="https://www.kdocs.cn/l/ceZHAUC8CPPd" target="_blank" class="box"><i>✦</i><span>密语 / 话术</span></a>
+        <a href="https://www.kdocs.cn/l/ceZHAUC8CPPd" target="_blank" class="box"><i>🕯</i><span>颂词 / 板评</span></a>
+      </div>
+    </div>
+    <div class="divider"></div>
+  </div>
+</div>
+
+<script>
+/* =========================================
+   1. 滚动渐显引擎
+   ========================================= */
+var sections = document.querySelectorAll('.section:not(#page0)');
+
+// 使用 IntersectionObserver 监听滚动
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      // 加类触发动画
+      entry.target.classList.add('visible');
+      // 滑到这一页时，播放风铃声
+      playChime();
+    }
+  });
+}, { threshold: 0.3 }); // 元素露出 30% 时触发
+
+sections.forEach(function(sec) {
+  observer.observe(sec);
+});
+
+/* =========================================
+   2. 柔和风铃音效引擎 (不刺耳)
+   ========================================= */
+var actx = null;
+var masterGain = null;
+var soundEnabled = false; // 默认关闭，需用户点击按钮
+var btn = document.getElementById('btn');
+
+// 初始化音频环境
+function initAudio() {
+  if (actx) return;
+  var AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+  
+  actx = new AC();
+  masterGain = actx.createGain();
+  masterGain.gain.value = 0.3; // 整体音量
+  masterGain.connect(actx.destination);
+}
+
+// 播放风铃
+function playChime() {
+  if (!soundEnabled || !actx) return;
+  if (actx.state === 'suspended') actx.resume();
+
+  // 选取柔和的和弦音 (如 F大调、A小调的音，如 F4, A4, C5, E5)
+  var notes = [349.23, 440.00, 523.25, 659.25];
+  var freq = notes[Math.floor(Math.random() * notes.length)];
+  
+  var osc = actx.createOscillator();
+  var gain = actx.createGain();
+  var filter = actx.createBiquadFilter();
+  
+  // 纯正弦波最柔和，绝无毛刺
+  osc.type = 'sine'; 
+  osc.frequency.setValueAtTime(freq, actx.currentTime);
+  
+  // 低通滤波器切掉任何可能产生尖锐感的极高频
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(800, actx.currentTime);
+  
+  // 包络：缓慢起音，极长释放
+  var t = actx.currentTime;
+  gain.gain.setValueAtTime(0, t);
+  gain.gain.linearRampToValueAtTime(0.25, t + 0.1); // 0.1秒淡入，去掉敲击感
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 2.5); // 2.5秒消散
+  
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(masterGain);
+  
+  osc.start(t);
+  osc.stop(t + 2.6);
+}
+
+// 音效开关
+btn.onclick = function(e) {
+  e.stopPropagation();
+  initAudio();
+  if (actx.state === 'suspended') actx.resume();
+
+  soundEnabled = !soundEnabled;
+  btn.className = soundEnabled ? 'on' : '';
+  
+  if (soundEnabled) {
+    // 开启时响一声
+    playChime();
+  }
+};
+
+// 如果用户划回了顶部重新看封面，再次往下滑时也能触发（解决Observer只触发一次的问题）
+// 这里用一种简单的滚动监听兜底，让声音触发更自然
+var lastScrollTop = 0;
+window.addEventListener('scroll', function() {
+  if (!soundEnabled || !actx) return;
+  var st = window.pageYOffset || document.documentElement.scrollTop;
+  
+  // 当滚动跨越章节时，代码里的 IntersectionObserver 会接管发声
+  // 这里保留防抖防止过度触发
+  lastScrollTop = st <= 0 ? 0 : st;
+}, false);
+</script>
+</body>
+</html>
